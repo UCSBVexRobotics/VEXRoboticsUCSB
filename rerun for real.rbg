@@ -1,0 +1,140 @@
+#pragma config(UART_Usage, UART1, uartVEXLCD, baudRate19200, IOPins, None, None)
+#pragma config(Motor,  port1,           m,             tmotorVex393_HBridge, openLoop)
+
+#pragma debuggerWindows (VexLCD)
+#pragma debuggerWindows (debugStream)
+
+#define simulation_scale_factor 100
+
+int joystick = 0;
+int data[150];
+bool recording = false;
+
+void initialize ();
+void joystick_simulation ();
+task LCD ();
+task record_and_write ();
+void writeReplayCode ();
+
+task main()
+{
+	initialize ();
+	while(true)
+	{
+		if (recording)
+		{
+			joystick_simulation();
+			recording=false;
+		}
+		wait1Msec(1);
+	}
+}
+
+//////////////////////////////////
+
+void initialize_data_array ()
+{
+	for(int i=0;i<150;i++)
+	{
+		data[i]=0;
+	}
+}
+
+void initialize ()
+{
+	clearDebugStream();
+	initialize_data_array();
+	startTask(LCD);
+	startTask(record_and_write);
+}
+
+void visualize_joystick_simulation ()
+{
+	writeDebugStreamLine("%i",joystick);
+}
+
+void joystick_simulation ()
+{
+	for (int i=0; i<150;i++)
+	{
+		joystick = simulation_scale_factor*sin(i/PI);
+		wait1Msec(100);
+		//visualize_joystick_simulation();
+	}
+}
+
+task LCD ()
+{
+  int count=1;
+	string time;
+	while(true)
+	{
+		if (nLCDButtons==2)
+		{
+			recording = true;
+			displayLCDString(0,0,"   recording    ");
+			displayLCDString(1,0,"                ");
+			while(count<15000)
+			{
+				count++;
+				sprintf(time,"%2.3f",count/1000.000);
+				displayLCDCenteredString(1,time);
+				wait1Msec(1);
+			}
+		}
+		displayLCDString(0,0,"    press to    ");
+		displayLCDString(1,0,"start  recording");
+		wait1Msec(1);
+	}
+}
+
+void newLine ()
+{
+	writeDebugStreamLine("");
+}
+
+void writeReplayCode ()
+{
+	writeDebugStreamLine("void replay ()");
+	writeDebugStreamLine("{");
+	writeDebugStreamLine("	byte drive[150] = {");
+	for(byte i=0;i<10;i++)
+	{
+		for (byte j=0;j<15;j++)
+		{
+			writeDebugStream("%i,",data[j+i*15]);
+		}
+		newLine();
+	}
+	writeDebugStreamLine("};");
+	writeDebugStreamLine("	for(int i=0;i<150;i++)");
+	writeDebugStreamLine("	{");
+	writeDebugStreamLine("		motor[m] = drive[i];");
+	writeDebugStreamLine("		wait1Msec(100);");
+	writeDebugStreamLine("	}");
+	writeDebugStreamLine("	motor[m] = 0;");
+	writeDebugStreamLine("}");
+
+}
+
+task record_and_write ()
+{
+	int count = 0;
+	bool write = false;
+	while(true)
+	{
+		while(recording&&count<150)
+		{
+			data[count]=joystick;
+			count++;
+			write=true;
+			wait1Msec(100);
+		}
+		if(write)
+		{
+			writeReplayCode();
+			write=false;
+		}
+		wait1Msec(1);
+	}
+}
