@@ -17,6 +17,7 @@ class Drive{
     static constexpr double PI = 3.14159265;
 
     //constructor, pass in port numbers to appropriately initialize
+    //AND starts motors
     Drive(int portA = 0,int portB = 0);
 
     //destructor, destroys dynamic memory
