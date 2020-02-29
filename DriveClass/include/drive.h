@@ -18,7 +18,8 @@ class Drive{
 
     //constructor, pass in port numbers to appropriately initialize
     //AND starts motors
-    Drive(int portA = 0,int portB = 0);
+    //PORTS: [A = Front Left, B = Front Right, C = Back Left, D = Back Right]
+    Drive(int portA = 0,int portB = 0, int portC = 0, int portD = 0);
 
     //destructor, destroys dynamic memory
     ~Drive();
@@ -40,11 +41,12 @@ class Drive{
     void turnLeft();
 
     //robot movement during autonomous period
-    void autonomous();
+    void autoPeriod();
 
   private:
-    motor* LeftMotor = new motor(0, ratio18_1, false);
-    motor* RightMotor = new motor(0, ratio18_1, false);
-
+    motor* FrontLeftMotor = new motor(0, ratio18_1, false);
+    motor* FrontRightMotor = new motor(0, ratio18_1, false);
+    motor* BackLeftMotor = new motor(0, ratio18_1, false);
+    motor* BackRightMotor = new motor(0, ratio18_1, false);
 };
 #endif

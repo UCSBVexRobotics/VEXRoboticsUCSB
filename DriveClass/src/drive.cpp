@@ -11,97 +11,94 @@
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
+#include "drive.h"
 
 using namespace vex;
 
+Drive::Drive(int portA,int portB, int portC, int portD){
+  delete FrontLeftMotor;
+  delete FrontRightMotor;
+  delete BackLeftMotor;
+  delete BackRightMotor;
+  FrontLeftMotor = new motor(portA, ratio18_1, false);
+  FrontRightMotor = new motor(portB, ratio18_1, false);
+  BackLeftMotor = new motor(portC, ratio18_1, false);
+  BackRightMotor = new motor(portD, ratio18_1, false);
+}
 
-class Drive{
-  public:
-    static constexpr double PI = 3.14159265;
-    static constexpr double velocity = -1; //PLACEHOLDER TEST
+//destructor
+Drive::~Drive(){
+  delete FrontLeftMotor;
+  delete FrontRightMotor;
+  delete BackLeftMotor;
+  delete BackRightMotor;
+}
 
-    //constructor
-    Drive(int portA = 0,int portB = 0){
-      delete LeftMotor;
-      delete RightMotor;
-      LeftMotor = new motor(portA, ratio18_1, false);
-      RightMotor = new motor(portB, ratio18_1, false);
-    }
+void Drive::startMotors(){
+  FrontLeftMotor->spin(forward);
+  FrontRightMotor->spin(forward);
+  BackLeftMotor->spin(forward);
+  BackRightMotor->spin(forward);
+}
 
-    //destructor
-    ~Drive(){
-      delete LeftMotor;
-      delete RightMotor;
-    }
+void Drive::move(double x, double y){
+  double unit_x = x / 100;
+  double unit_y = y / 100;
+  double unit_magnitude = sqrt(unit_x * unit_x + unit_y * unit_y);
 
-    void startMotors(){
-      LeftMotor->spin(forward);
-      RightMotor->spin(forward);
-    }
+  //check domain
+  if(unit_magnitude > 1){
+    unit_magnitude = 1;
+  }
 
-    void move(double x, double y){
-      double unit_x = x / 100;
-      double unit_y = y / 100;
-      double unit_magnitude = sqrt(unit_x * unit_x + unit_y * unit_y);
+  //check for reverse direction
+  if(y < 0){
+    unit_magnitude *= -1;
+  }
 
-      //check domain
-      if(unit_magnitude > 1){
-        unit_magnitude = 1;
-      }
+  //go straight
+  if(x == 0){
+    FrontRightMotor->setVelocity(100*unit_magnitude, percent);
+    FrontLeftMotor->setVelocity(100*unit_magnitude, percent);
+    BackRightMotor->setVelocity(100*unit_magnitude, percent);
+    BackLeftMotor->setVelocity(100*unit_magnitude, percent);
+  }
 
-      //check for reverse direction
-      if(y < 0){
-        unit_magnitude *= -1;
-      }
+  //turn left
+  else if(x < 0){
+    FrontRightMotor->setVelocity(100*unit_magnitude, percent);
+    FrontLeftMotor->setVelocity((100+x)*unit_magnitude, percent);
+    BackRightMotor->setVelocity(100*unit_magnitude, percent);
+    BackLeftMotor->setVelocity((100+x)*unit_magnitude, percent);
+  }
 
-      //go straight
-      if(x == 0){
-        RightMotor->setVelocity(100*unit_magnitude, percent);
-        LeftMotor->setVelocity(100*unit_magnitude, percent);
-      }
+  //turn right
+  else{
+    FrontLeftMotor->setVelocity(100*unit_magnitude, percent);
+    FrontRightMotor->setVelocity((100-x)*unit_magnitude, percent);
+    BackLeftMotor->setVelocity(100*unit_magnitude, percent);
+    BackRightMotor->setVelocity((100-x)*unit_magnitude, percent);
+  }
+}
 
-      //turn left
-      else if(x < 0){
-        RightMotor->setVelocity(100*unit_magnitude, percent);
-        LeftMotor->setVelocity((100+x)*unit_magnitude, percent);
-      }
+void Drive::moveForward(double distance, double velocity){
+  double time = velocity / distance;
+  move(0, 100);
+  task::sleep(time);
+}
 
-      //turn right
-      else{
-        LeftMotor->setVelocity(100*unit_magnitude, percent);
-        RightMotor->setVelocity((100-x)*unit_magnitude, percent);
-      }
-    }
+void Drive::turnRight(){
+  move(70.71, 70.71);
+  task::sleep(-1); //PLACEHOLDER TIME
+}
 
-    void moveForward(double distance){
-      double time = velocity / distance;
-      move(0, 100);
-      task::sleep(time);
-    }
+void Drive::turnLeft(){
+  move(-70.71, 70.71);
+  task::sleep(-1); //PLACEHOLDER TIME
+}
 
-    void turnRight(){
-      move(70.71, 70.71);
-      task::sleep(-1); //PLACEHOLDER TIME
-    }
+void Drive::autoPeriod(){
+  //PLACEHOLDER
+}
 
-    void turnLeft(){
-      move(-70.71, 70.71);
-      task::sleep(-1); //PLACEHOLDER TIME
-    }
-
-    void autonomous(){
-      double d1 = -1; //PLACEHOLDER VALUE; NEEDS TESTING
-      double d2 = -1; //PLACEHOLDER VALUE; NEEDS TESTING
-      //start ramp suction
-      moveForward(d1);
-      turnRight();
-      moveForward(d2);
-      //place blocks in zone
-    }
-
-  private:
-    motor* LeftMotor = new motor(0, ratio18_1, false);
-    motor* RightMotor = new motor(0, ratio18_1, false);
-
-};
 
