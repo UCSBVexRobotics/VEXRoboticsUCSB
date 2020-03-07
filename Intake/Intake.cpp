@@ -3,7 +3,7 @@
 class Intake{
   // Intake class for two motors
   public:
-  Intake(int32_t setPort, gearSetting setRatio, bool isReversedRight, bool isReversedLeft, directionType one, directionType two);
+  Intake(int32_t setPortR, int32_t setPortL, gearSetting setRatio, bool isReversedRight, bool isReversedLeft, directionType one, directionType two);
   void setIntakeVelocity(double Velocity);
   double velocityInput;
 
@@ -12,14 +12,14 @@ class Intake{
   motor rightIntake, leftIntake;
 };
 
-Intake::Intake(int32_t setPort, gearSetting setRatio, bool isReversedRight,
+Intake::Intake(int32_t setPortR, int32_t setPortL, gearSetting setRatio, bool isReversedRight,
                 bool isReversedLeft, directionType one, directionType two):
                   // Initializing the Motors
-                  rightIntake(motor(setPort, setRatio, isReversedRight)),
-                  leftIntake (motor(setPort, setRatio, isReversedLeft)) 
+                  rightIntake(motor(setPortR, setRatio, isReversedRight)),
+                  leftIntake (motor(setPortL, setRatio, isReversedLeft)) 
 {
   // Default format: Intake(setPort, setRatio, isReversedRight, isReversedLeft, right, left)
-  // Valid inputs for setPort: PORT + a number from 1 to 21
+  // Valid inputs for setPortR and setPortL: PORT + a number from 1 to 21
   // Valid Inputs for setRatio: ratio36_1, ratio18_1, ratio6_1 
   // Set isReversedRight and isReversedLeft to either true or false
   // Set the direction of the motors (one and two) to either forward or reverse
