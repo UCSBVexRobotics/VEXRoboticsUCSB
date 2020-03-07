@@ -6,10 +6,10 @@ class Intake{
   Intake(int32_t setPort, gearSetting setRatio, bool isReversedRight, bool isReversedLeft, directionType one, directionType two);
   void setIntakeVelocity(double Velocity);
   double velocityInput;
-  motor rightIntake, leftIntake;
+
 
   private:
-
+  motor rightIntake, leftIntake;
 };
 
 Intake::Intake(int32_t setPort, gearSetting setRatio, bool isReversedRight,
